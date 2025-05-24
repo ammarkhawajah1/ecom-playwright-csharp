@@ -1,0 +1,34 @@
+name: .NET Playwright CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install Playwright CLI
+        run: dotnet tool install --global Microsoft.Playwright.CLI
+
+      - name: Restore and Build
+        run: dotnet restore && dotnet build --configuration Release
+
+      - name: Install Playwright Browsers
+        run: playwright install
+
+      - name: Run Smoke Tests
+        run: dotnet test EcomPlaywrightTests --no-build --filter "Category=Smoke"
+
+      - name: Run Regression Tests
+        run: dotnet test EcomPlaywrightTests --no-build --filter "Category=Regression"
